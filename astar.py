@@ -2,14 +2,14 @@ from queue import PriorityQueue
 from board import *
 import pygame
 from constants import *
-
+FPS = 60
+# fpsClock = pygame.time.Clock()
 WIN = pygame.display.set_mode((WIDTH,WIDTH))
 def reconstruct_path(came_from,current,draw):
     while current in came_from:
         current = came_from[current]
         current.make_path()
         draw()
-
 
 def astar(draw,grid,start,end):
     count = 0
@@ -48,6 +48,12 @@ def astar(draw,grid,start,end):
             if(temp_g_score < g_score[neighbor]):
                 came_from[neighbor] = current #* If the g_score of the neighbor node is less than the g_score of the current node, then we update the came_from dict
                 
+                
+                if(neighbor == end): #* If the neighbor node is the end node, then we reconstruct the path and return True
+                    reconstruct_path(came_from,end,draw)
+                    end = end.mark_end()
+                    return True
+
                 g_score[neighbor] = temp_g_score #* Updating the g_score of the neighbor node
                 
                 f_score[neighbor] = temp_g_score + heuristic(neighbor.get_pos(),end.get_pos()) #* Updating the f_score of the neighbor node
@@ -59,7 +65,8 @@ def astar(draw,grid,start,end):
                     neighbor.mark_open()
 
         draw()
-
+        # pygame.display.update()
+        # fpsClock.tick(FPS)
         if current!=start: #* If the current node is not the start node, then we mark it as closed, Color(RED)
             current.mark_visited()
 

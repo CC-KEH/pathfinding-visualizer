@@ -1,6 +1,10 @@
-from board import *
+
 import pygame
+from queue import PriorityQueue
+import math
 from constants import *
+from board import *
+
 
 def reconstruct_path(came_from,current,draw):
     while current in came_from:
@@ -8,37 +12,41 @@ def reconstruct_path(came_from,current,draw):
         current.make_path()
         draw()
 
-
-def dfs(draw,grid,start,end):
-    stack = [start]
-    visited = {start}
+def bstar(draw,grid,start,end):
+    open_set = PriorityQueue()
+    open_set.put((0,start))
     came_from = {}
-    while stack:
+    g_score = {node:float("inf") for row in grid for node in row}
+    g_score[start] = 0
+    f_score = {node:float("inf") for row in grid for node in row}
+
+    while not open_set.empty():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-         
-        current = stack.pop()
+        
+        current = open_set.get()[1]
         if current == end:
             reconstruct_path(came_from,end,draw)
-            end = end.mark_end()
+            end.mark_end()
             return True
         
         for neighbor in current.neighbors:
-            if neighbor not in visited:
+            temp_g_score = g_score[current] + 1
+            if(temp_g_score < g_score[neighbor]):
                 came_from[neighbor] = current
-                if(neighbor == end): #* If the neighbor node is the end node, then we reconstruct the path and return True
-                    reconstruct_path(came_from,end,draw)
-                    end = end.mark_end()
-                    return True
-                stack.append(neighbor)
-                visited.add(neighbor)
+                g_score[neighbor] = temp_g_score
+                f_score[neighbor] = temp_g_score + heuristic(neighbor.get_pos(),end.get_pos())
+                open_set.put((f_score[neighbor],neighbor))
                 neighbor.mark_open()
+        
         draw()
-
-        if current!=start:
+        
+        if current!=start: #* If the current node is not the start node, then we mark it as closed, Color(RED)
             current.mark_visited()
 
+
+    return False
 
 
 def main(win,width):
@@ -83,7 +91,7 @@ def main(win,width):
                     for row in grid:
                         for node in row:
                             node.update_neighbors(grid)
-                    dfs(lambda:draw(win,grid,ROWS,width),grid,start,end)
+                    bstar(lambda:draw(win,grid,ROWS,width),grid,start,end)
             
                 if event.key == pygame.K_c:
                     start = None
