@@ -1,23 +1,9 @@
 import pygame
-import math
-import astar
 from constants import *
 #Setting up the grid
 WIDTH = 800
 WIN = pygame.display.set_mode((WIDTH,WIDTH))
 pygame.display.set_caption("A* Path Finding")
-
-#Defining colors
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 255, 0)
-YELLOW = (255, 255, 0)
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-PURPLE = (128, 0, 128)
-ORANGE = (255, 165 ,0)
-GREY = (128, 128, 128)
-TURQUOISE = (64, 224, 208)
 
 
 class Node:
@@ -129,61 +115,10 @@ def draw(win,grid,rows,width):
     pygame.display.update()
 
 
-#* Returns the position of the node that is clicked in terms of row and col
+#* Tells us about the node we click, returning the position of that node in terms of row and col
 def get_clicked_pos(pos,rows,width):
     node_width = width//rows
     y,x = pos
     row = y // node_width
     col = x // node_width
     return row,col
-
-def main(win,width):
-    ROWS = 50
-    grid = make_grid(ROWS,width)
-    start = None
-    end = None 
-    run = True
-    started = False
-    while run:
-        draw(win,grid,ROWS,width)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-            if started:
-                continue
-            if pygame.mouse.get_pressed()[0]:   #*Left Button
-                pos = pygame.mouse.get_pos()
-                row,col = get_clicked_pos(pos,ROWS,width)
-                node = grid[row][col]
-                if not start and node!=end:
-                    start = node
-                    start.mark_start()
-                
-                elif not end and node!=start:
-                    end = node
-                    end.mark_end()
-                
-                elif node!=end and node!=start:
-                    node.mark_obstacle()
-
-            elif pygame.mouse.get_pressed()[2]:  #*Right Button
-                pos = pygame.mouse.get_pos()
-                row,col = get_clicked_pos(pos,ROWS,width)
-                node = grid[row][col]
-                node.reset()
-                if node == start:
-                    start = None
-                elif node == end:
-                    end = None
-
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE and not started:
-                    for row in grid:
-                        for node in row:
-                            node.update_neighbors()
-                    #TODO: Check without using lambda function
-                    astar(lambda:draw(win,grid,ROWS,width),grid,start,end)
-
-    pygame.quit()
-
-main(WIN,WIDTH)
