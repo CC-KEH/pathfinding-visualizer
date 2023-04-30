@@ -2,21 +2,18 @@
 from board import *
 import pygame
 from constants import *
+from system import *
+import numpy as np
 
-def reconstruct_path(came_from,current,draw):
-    current.make_path()
-    while current in came_from:
-        current = came_from[current]
-        current.make_path()
-        draw()
 
-def algorithm(draw,grid,start,end):
+def bi_bfs(draw,grid,start,end,output, win, width):
     queue1 = [start]
     queue2 = [end]
-    visited1 = {start}
-    visited2 = {end}
+    visited1 = [start]
+    visited2 = [end]
     came_from1 = {}
     came_from2 = {}
+    vis = 0
     while queue1 and queue2:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -26,101 +23,206 @@ def algorithm(draw,grid,start,end):
         current2 = queue2.pop(0)
 
         if (current1 in visited2):
-            reconstruct_path(came_from1,current1,draw)
-            reconstruct_path(came_from2,current1,draw)
-            return True
-        
+            path,inc = reconstruct_path(came_from1,current1,start,draw,visited1, win, width, grid)
+            path,inc = reconstruct_path(came_from2,current1,end,draw,visited2, win, width, grid)
+            start.make_start()
+            output.set_text1(f"Path Length: {inc}")
+            output.set_text2(f"#Visited nodes: {vis}")
+            if vis != 0:
+                output.set_text3(f"Efficiency: {np.round(inc/vis, decimals=3)}")
+            return visited2, path
+                      
         elif (current2 in visited1):
-            reconstruct_path(came_from1,current2,draw)
-            reconstruct_path(came_from2,current2,draw)
-            return True
+            path,inc = reconstruct_path(came_from1,start,current2,draw,visited1, win, width, grid)
+            path,inc = reconstruct_path(came_from2,current2,end,draw,visited2, win, width, grid)
+            start.make_start()
+            output.set_text1(f"Path Length: {inc}")
+            output.set_text2(f"#Visited nodes: {vis}")
+            if vis != 0:
+                output.set_text3(f"Efficiency: {np.round(inc/vis, decimals=3)}")
+            return visited1, path
         
-
 
         if current1 == end or current2 == start:
-            reconstruct_path(came_from1,current1,draw)
-            reconstruct_path(came_from2,current2,draw)
-            return True
+            path,inc = reconstruct_path(came_from1,current1,end,draw,visited1, win, width, grid)
+            path,inc = reconstruct_path(came_from2,current2,start,draw,visited2, win, width, grid)
+            start.make_start()
+            output.set_text1(f"Path Length: {inc}")
+            output.set_text2(f"#Visited nodes: {vis}")
+            if vis != 0:
+                output.set_text3(f"Efficiency: {np.round(inc/vis, decimals=3)}")
+            return visited1, path
         
-        for neighbor in current1.neighbors: #*Check all the neighbors of the current node
-            if neighbor not in visited1:
-                came_from1[neighbor] = current1
-                if(neighbor == end): #* If the neighbor node is the end node, then we reconstruct the path and return True
-                    reconstruct_path(came_from1,end,draw)
-                    end = end.mark_end()
-                    return True
-                queue1.append(neighbor)
-                visited1.add(neighbor)
-                neighbor.mark_open()   
-        draw()
+        c = 1
 
+        for neighbor in current1.neighbors: #*Check all the neighbors of the current node
+            if not neighbor.is_barrier():
+                if neighbor not in visited1:
+                    came_from1[neighbor] = current1
+                    if(neighbor == end): #* If the neighbor node is the end node, then we reconstruct the path and return True
+                        path, inc = reconstruct_path(came_from1, start, end, draw, visited1, win, width, grid)
+                        start.make_start()
+                        output.set_text1(f"Path Length: {inc}")
+                        output.set_text2(f"#Visited nodes: {vis}")
+                        if vis != 0:
+                            output.set_text3(f"Efficiency: {np.round(inc/vis, decimals=3)}")
+                        return visited1, path   
+                    queue1.append(neighbor)
+                    visited1.append(neighbor)
+                    neighbor.make_open()
+        
         for neighbor in current2.neighbors: #*Check all the neighbors of the current node
             if neighbor not in visited2:
                 came_from2[neighbor] = current2
                 if(neighbor == end): #* If the neighbor node is the end node, then we reconstruct the path and return True
-                    reconstruct_path(came_from2,end,draw)
-                    end = end.mark_end()
-                    return True
+                    path, inc = reconstruct_path(came_from1, start, end, draw, visited2, win, width, grid)
+                    start.make_start()
+                    output.set_text1(f"Path Length: {inc}")
+                    output.set_text2(f"#Visited nodes: {vis}")
+                    if vis != 0:
+                        output.set_text3(f"Efficiency: {np.round(inc/vis, decimals=3)}")
+                    return visited2, path  
                 queue2.append(neighbor)
-                visited2.add(neighbor)
-                neighbor.mark_open()   
-        draw()
-
-        if current1!=start: #*If the current node is not the start node, mark it as visited
-            current1.mark_visited()
+                visited2.append(neighbor)
+                neighbor.make_open() 
         
-        if current2!=end: #*If the current node is not the start node, mark it as visited
-            current2.mark_visited()
+        if current1 != start:
+            vis+=c
+            current1.make_visit()
+        visit_animation(visited1)
+        for rows in grid:
+            for node in rows:
+                node.draw(win)
+        draw_grid(win, len(grid), width)
+        pygame.display.update()
+        
+        if current2 != end:
+            vis+=c
+            current2.make_visit()
+        visit_animation(visited2)
+        for rows in grid:
+            for node in rows:
+                node.draw(win)
+        draw_grid(win, len(grid), width)
+        pygame.display.update()
 
-def bidirectional_bfs(win,width):
-    ROWS = 50
-    grid = make_grid(ROWS,width)
-    start = None
-    end = None 
-    run = True
-    while run:
-        draw(win,grid,ROWS,width)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
+    return visited1, False
 
-            if pygame.mouse.get_pressed()[0]:   #*Left Button
-                pos = pygame.mouse.get_pos()
-                row,col = get_clicked_pos(pos,ROWS,width)
-                node = grid[row][col]
-                if not start and node!=end: #* Cannot make your end node as start, if we click on the same node again
-                    start = node
-                    start.mark_start()
+        
+
+
+# def bidirectonal_bfs(draw,grid,start,end):
+#     queue1 = [start]
+#     queue2 = [end]
+#     visited1 = {start}
+#     visited2 = {end}
+#     came_from1 = {}
+#     came_from2 = {}
+#     while queue1 and queue2:
+#         for event in pygame.event.get():
+#             if event.type == pygame.QUIT:
+#                 pygame.quit()
+        
+#         current1 = queue1.pop(0)
+#         current2 = queue2.pop(0)
+
+#         if (current1 in visited2):
+#             reconstruct_path(came_from1,current1,draw)
+#             reconstruct_path(came_from2,current1,draw)
+#             return True
+        
+#         elif (current2 in visited1):
+#             reconstruct_path(came_from1,current2,draw)
+#             reconstruct_path(came_from2,current2,draw)
+#             return True
+        
+
+
+#         if current1 == end or current2 == start:
+#             reconstruct_path(came_from1,current1,draw)
+#             reconstruct_path(came_from2,current2,draw)
+#             return True
+        
+#         for neighbor in current1.neighbors: #*Check all the neighbors of the current node
+#             if neighbor not in visited1:
+#                 came_from1[neighbor] = current1
+#                 if(neighbor == end): #* If the neighbor node is the end node, then we reconstruct the path and return True
+#                     reconstruct_path(came_from1,end,draw)
+#                     end = end.mark_end()
+#                     return True
+#                 queue1.append(neighbor)
+#                 visited1.add(neighbor)
+#                 neighbor.mark_open()   
+#         draw()
+
+#         for neighbor in current2.neighbors: #*Check all the neighbors of the current node
+#             if neighbor not in visited2:
+#                 came_from2[neighbor] = current2
+#                 if(neighbor == end): #* If the neighbor node is the end node, then we reconstruct the path and return True
+#                     reconstruct_path(came_from2,end,draw)
+#                     end = end.mark_end()
+#                     return True
+#                 queue2.append(neighbor)
+#                 visited2.add(neighbor)
+#                 neighbor.mark_open()   
+#         draw()
+
+#         if current1!=start: #*If the current node is not the start node, mark it as visited
+#             current1.mark_visited()
+        
+#         if current2!=end: #*If the current node is not the start node, mark it as visited
+#             current2.mark_visited()
+
+# def main(win,width):
+#     ROWS = 50
+#     grid = make_grid(ROWS,width)
+#     start = None
+#     end = None 
+#     run = True
+#     while run:
+#         draw(win,grid,ROWS,width)
+#         for event in pygame.event.get():
+#             if event.type == pygame.QUIT:
+#                 run = False
+
+#             if pygame.mouse.get_pressed()[0]:   #*Left Button
+#                 pos = pygame.mouse.get_pos()
+#                 row,col = get_clicked_pos(pos,ROWS,width)
+#                 node = grid[row][col]
+#                 if not start and node!=end: #* Cannot make your end node as start, if we click on the same node again
+#                     start = node
+#                     start.mark_start()
                 
-                elif not end and node!=start:   #* Cannot make your start node as end, if we click on the same node again
-                    end = node
-                    end.mark_end()
+#                 elif not end and node!=start:   #* Cannot make your start node as end, if we click on the same node again
+#                     end = node
+#                     end.mark_end()
                 
-                elif node!=end and node!=start:
-                    node.mark_obstacle()
+#                 elif node!=end and node!=start:
+#                     node.mark_obstacle()
 
-            elif pygame.mouse.get_pressed()[2]:  #*Right Button
-                pos = pygame.mouse.get_pos()
-                row,col = get_clicked_pos(pos,ROWS,width)
-                node = grid[row][col]
-                node.reset()
-                if node == start:
-                    start = None
-                elif node == end:
-                    end = None
+#             elif pygame.mouse.get_pressed()[2]:  #*Right Button
+#                 pos = pygame.mouse.get_pos()
+#                 row,col = get_clicked_pos(pos,ROWS,width)
+#                 node = grid[row][col]
+#                 node.reset()
+#                 if node == start:
+#                     start = None
+#                 elif node == end:
+#                     end = None
 
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE and start and end:   #* Start the algo if start and end are marked 
-                    for row in grid:
-                        for node in row:
-                            node.update_neighbors(grid)
-                    algorithm(lambda:draw(win,grid,ROWS,width),grid,start,end)
+#             if event.type == pygame.KEYDOWN:
+#                 if event.key == pygame.K_SPACE and start and end:   #* Start the algo if start and end are marked 
+#                     for row in grid:
+#                         for node in row:
+#                             node.update_neighbors(grid)
+#                     bidirectonal_bfs(lambda:draw(win,grid,ROWS,width),grid,start,end)
             
-                if event.key == pygame.K_c:
-                    start = None
-                    end = None
-                    grid = make_grid(ROWS,width)
+#                 if event.key == pygame.K_c:
+#                     start = None
+#                     end = None
+#                     grid = make_grid(ROWS,width)
 
-    pygame.quit()
+#     pygame.quit()
 
-bidirectional_bfs(WIN,WIDTH)
+# if __name__ == "__main__":
+#     main(WIN,WIDTH)

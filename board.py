@@ -1,5 +1,6 @@
 import pygame
 from constants import *
+import numpy as np
 #Setting up the grid
 WIDTH = 800
 WIN = pygame.display.set_mode((WIDTH,WIDTH))
@@ -8,6 +9,7 @@ pygame.display.set_caption("A* Path Finding")
 
 class Node:
     def __init__(self,row,col,width,total_rows):
+        self.last = pygame.time.get_ticks()
         self.row = row
         self.col = col
         self.x = row*width
@@ -16,65 +18,118 @@ class Node:
         self.width = width
         self.neighbors = []
         self.total_rows = total_rows
+        self.weight = False
+        self.dec_animation = False
+        self.cooldown = 300
 
     def get_pos(self):
         return self.row,self.col
 
     def is_visited(self):
         #*Visited node is marked colored as RED
-        return self.color == RED
+        return self.color == VISIT1
     
     def is_open(self):
-        return self.color == GREEN
+        return self.color == OPEN
     
     def is_obstacle(self):
         return self.color == BLACK
     
+    def is_barrier(self):
+        return self.color == BLACK
+
+    def is_weight(self):
+        return self.weight
+
     def is_start(self):
-        return self.color == ORANGE
+        return self.color == START
     
     def is_end(self):
-        return self.color == TURQUOISE
-    
+        return self.color == END
+
+    def is_neutral(self):
+        return self.color == WHITE
+
+    def is_looked(self):
+        return self.color == LOOK
+
     def reset(self):
         self.color = WHITE
+        self.weight = False
+
+    def make_visit(self):
+        if not self.is_weight():
+            self.color = VISIT2
+        else:
+            self.color = VISIT3
     
-    def mark_visited(self):
+    def make_open(self):
+        if not self.is_weight():
+            self.color = OPEN
+        else:
+            self.color = OPEN1
+    
+    def make_start(self):
+        self.color = START
+        self.weight = False
+
+    def make_barrier(self):
+        if not self.is_start() and not self.is_end():
+            self.color = BLACK
+            self.weight = False
+
+    def make_weight(self):
+        if not self.is_start() and not self.is_end():
+            self.color = BROWN
+            self.weight = True
+
+    def make_end(self):
         self.color = RED
-    
-    def mark_open(self):
-        self.color = GREEN
-    
-    def mark_start(self):
-        self.color = ORANGE
-
-    def mark_obstacle(self):
-        self.color = BLACK
-
-    def mark_end(self):
-        self.color = TURQUOISE
+        self.weight = False
 
     def make_path(self):
-        self.color = PURPLE
+        if not self.is_weight():
+            self.color = PATH1
+        else:
+            self.color = PATH3
 
-    def draw(self,win):
-        pygame.draw.rect(win,self.color,(self.x,self.y,self.width,self.width))
+    def looking_at(self):
+        self.color = LOOK
 
-    def update_neighbors(self,grid):
-        self.neighbors = []
-        #* If not an obstacle then add the node to the neighbor list of the current node, Checking in each direction with edge case
-        if self.row < self.total_rows-1 and not grid[self.row+1][self.col].is_obstacle(): #* Down
-            self.neighbors.append(grid[self.row+1][self.col])
+    def draw(self, win):
+        try:
+            pygame.draw.rect(win, self.color, (self.x, self.y, self.width, self.width))
+        except:
+            print(self.color)
+            input()
+    
+    def update_neighbors(self, grid, diag = False):
+        r = self.row 
+        c = self.col
+        if r < self.total_rows-1 and not grid[r+1][c].is_barrier():
+            self.neighbors.append(grid[r+1][c])
+            
+        if r > 0 and not grid[r-1][c].is_barrier():
+            self.neighbors.append(grid[r-1][c])
+            
+        if c < self.total_rows-1 and not grid[r][c+1].is_barrier():
+            self.neighbors.append(grid[r][c+1])
+            
+        if c > 0 and not grid[r][c-1].is_barrier():
+            self.neighbors.append(grid[r][c-1])
         
-        if self.row > 0 and not grid[self.row-1][self.col].is_obstacle(): #* Up
-            self.neighbors.append(grid[self.row-1][self.col])
+        if diag:
+            if r < self.total_rows-1 and c < self.total_rows-1 and not grid[r+1][c+1].is_barrier():
+                self.neighbors.append(grid[r+1][c+1])
 
-        if self.col > 0 and not grid[self.row][self.col-1].is_obstacle(): #* Left
-            self.neighbors.append(grid[self.row][self.col-1])
-        
-        if self.col < self.total_rows-1 and not grid[self.row][self.col+1].is_obstacle(): #* Right
-            self.neighbors.append(grid[self.row][self.col+1])
+            if r > 0 and c < self.total_rows-1 and not grid[r-1][c+1].is_barrier():
+                self.neighbors.append(grid[r-1][c+1])
 
+            if r > 0 and c > 0 and not grid[r-1][c-1].is_barrier():
+                self.neighbors.append(grid[r-1][c-1])
+
+            if r < self.total_rows-1 and c > 0 and not grid[r+1][c-1].is_barrier():
+                self.neighbors.append(grid[r+1][c-1])
 
     def __lt__(self,other):
         return False
@@ -96,23 +151,28 @@ def make_grid(rows,width):
     
     return grid
 
-#* Draws the Grid "LINES" in the pygame
-def draw_grid_lines(win,rows,width):
-    node_width = width // rows
+
+
+
+def make_grid(rows, width):
+    grid = []
+    gap = width // rows
     for i in range(rows):
-        pygame.draw.line(win,GREY,(0,i*node_width),(width,i*node_width))
+        grid.append([])
         for j in range(rows):
-            pygame.draw.line(win,GREY,(j*node_width,0),(j*node_width,width))
+            node = Node(i, j, gap, rows)
+            grid[i].append(node)
+    return np.array(grid)
 
 
-#* Draw the Grid in pygame, this function is called everytime to update the board
-def draw(win,grid,rows,width):
-    win.fill(WHITE)
-    for row in grid:
-        for node in row:
-            node.draw(win)
-    draw_grid_lines(win,rows,width)
-    pygame.display.update()
+
+#* Draws the Grid "LINES" in the pygame
+def draw_grid(win, rows, width):
+    gap = width // rows
+    for i in range(rows+1):
+        pygame.draw.line(win, GREY, (0, i*gap), (rows*gap, i*gap))
+    for i in range(rows+1):
+        pygame.draw.line(win, GREY, (i*gap, 0), (i*gap, rows*gap))
 
 
 #* Tells us about the node we click, returning the position of that node in terms of row and col
@@ -122,3 +182,30 @@ def get_clicked_pos(pos,rows,width):
     row = y // node_width
     col = x // node_width
     return row,col
+
+def is_free(grid, x, y):
+    count = 0
+    if y+1 < len(grid) and grid[x][y+1].is_barrier() :
+        count +=1
+    if y-1>=0 and grid[x][y-1].is_barrier():
+        count +=1
+    if x+1 < len(grid) and grid[x+1][y].is_barrier():
+        count+=1
+    if x-1>=0 and grid[x-1][y].is_barrier():
+        count+=1
+    if count >= 3:
+        return True
+    return False
+
+
+def unvisited_n(grid, x, y):
+    n = []
+    if y+1 < len(grid) and grid[x][y+1].is_barrier() and is_free(grid, x, y+1):
+        n.append((x, y+1))
+    if y-1>=0 and grid[x][y-1].is_barrier() and is_free(grid, x, y-1):
+        n.append((x, y-1))
+    if x+1 < len(grid) and grid[x+1][y].is_barrier() and is_free(grid, x+1, y):
+        n.append((x+1, y))
+    if x-1>=0 and grid[x-1][y].is_barrier() and is_free(grid, x-1, y):
+        n.append((x-1, y))
+    return n
