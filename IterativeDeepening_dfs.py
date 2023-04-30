@@ -8,7 +8,7 @@ def reconstruct_path(came_from,current,draw):
         current.make_path()
         draw()
 
-def iterative_deepening_dfs(draw,grid,start,end,depth=20):
+def algorithm(draw,grid,start,end,depth=20):
     visited = {start}
     came_from = {}
     stack = [start]
@@ -38,7 +38,7 @@ def iterative_deepening_dfs(draw,grid,start,end,depth=20):
 
         
 
-def main(win,width):
+def iterative_deepening_dfs(win,width):
     ROWS = 50
     grid = make_grid(ROWS,width)
     start = None
@@ -80,7 +80,7 @@ def main(win,width):
                     for row in grid:
                         for node in row:
                             node.update_neighbors(grid)
-                    iterative_deepening_dfs(lambda: draw(win,grid,ROWS,width),grid,start,end)
+                    algorithm(lambda: draw(win,grid,ROWS,width),grid,start,end)
             
                 if event.key == pygame.K_c:
                     start = None
@@ -89,4 +89,4 @@ def main(win,width):
 
     pygame.quit()
 
-main(WIN,WIDTH)
+iterative_deepening_dfs(WIN,WIDTH)

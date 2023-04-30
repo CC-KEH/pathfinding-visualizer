@@ -9,7 +9,7 @@ def reconstruct_path(came_from,current,draw):
         draw()
 
 
-def dfs(draw,grid,start,end):
+def algorithm(draw,grid,start,end):
     stack = [start]
     visited = {start}
     came_from = {}
@@ -41,7 +41,7 @@ def dfs(draw,grid,start,end):
 
 
 
-def main(win,width):
+def dfs(win,width):
     ROWS = 50
     grid = make_grid(ROWS,width)
     start = None
@@ -83,7 +83,7 @@ def main(win,width):
                     for row in grid:
                         for node in row:
                             node.update_neighbors(grid)
-                    dfs(lambda:draw(win,grid,ROWS,width),grid,start,end)
+                    algorithm(lambda:draw(win,grid,ROWS,width),grid,start,end)
             
                 if event.key == pygame.K_c:
                     start = None
@@ -92,4 +92,4 @@ def main(win,width):
 
     pygame.quit()
 
-main(WIN,WIDTH)
+dfs(WIN,WIDTH)

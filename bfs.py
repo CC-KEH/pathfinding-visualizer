@@ -10,7 +10,7 @@ def reconstruct_path(came_from,current,draw):
 
 
 
-def bfs(draw,grid,start,end):   #*Breadth First Search
+def algorithm(draw,grid,start,end):   #*Breadth First Search
     queue = [start]
     visited = {start}
     came_from = {}
@@ -40,7 +40,7 @@ def bfs(draw,grid,start,end):   #*Breadth First Search
         if current!=start: #*If the current node is not the start node, mark it as visited
             current.mark_visited()
 
-def main(win,width):
+def bfs(win,width):
     ROWS = 50
     grid = make_grid(ROWS,width)
     start = None
@@ -91,4 +91,4 @@ def main(win,width):
 
     pygame.quit()
 
-main(WIN,WIDTH)
+bfs(WIN,WIDTH)

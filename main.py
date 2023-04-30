@@ -1,73 +1,63 @@
-import networkx as nx
-import matplotlib.pyplot as plt
+import pygame
+import pygame_menu
+from pygame_menu import themes
+from astar import astar
+pygame.init()
+surface = pygame.display.set_mode((600, 400))
 
-#utility fucntion used by DFS which does recursive depth first search 
-def DFSUtil(G, v, visited, sl): 
-	visited[v] = True
-	sl.append(v) 
-	for i in G[v]:
-		if visited[i] == False:
-			DFSUtil(G, i, visited, sl)
-	return sl
+def set_algorithm(value, algo):
+    print(value)
+    print(algo)
  
+def start_the_algo():
+    mainmenu._open(loading)
+    pygame.time.set_timer(update_loading, 30)
+ 
+def algo_menu():
+    mainmenu._open(level)
 
-
-#DFS traversal 
-def DFS(G, source): 
-	visited = [False]*(len(G.nodes()))
-	sl = []		#a list that stores dfs forest starting with source node
-	dfs_stk = [] #A nested list that stores all the DFS Forest's
-	dfs_stk.append(DFSUtil(G, source, visited, sl))
-	for i in range(len(G.nodes())):
-		if visited[i] == False:
-			sl = []
-			dfs_stk.append(DFSUtil(G, i, visited, sl))			
-	return dfs_stk
-			
-
-
-#takes input from the file and creates a weighted graph
-def CreateGraph():
-	G = nx.DiGraph()
-	f = open('input.txt')
-	n = int(f.readline())
-	wtMatrix = []
-	for i in range(n):
-		list1 = map(int,(f.readline()).split())
-		wtMatrix.append(list1)
-	source = int(f.readline()) #source vertex from where DFS has to start
-	#Adds egdes along with their weights to the graph 
-	for i in range(n):
-		for j in range(n):
-			if wtMatrix[i][j] > 0:
-					G.add_edge(i, j, length = wtMatrix[i][j]) 
-	return G,source
+font = pygame.font.Font(None, 40)
 
 
 
-#marks all edges traversed through DFS with red
-def DrawDFSPath(G, dfs_stk):
-	pos = nx.spring_layout(G)
-	nx.draw(G, pos, with_labels = True)  #with_labels=true is to show the node number in the output graph
-	edge_labels = dict([((u,v,), d['length']) for u, v, d in G.edges(data = True)])
-	nx.draw_networkx_edge_labels(G, pos, edge_labels = edge_labels, label_pos = 0.3, font_size = 11) #prints weight on all the edges
-	for i in dfs_stk:
-		#if there is more than one node in the dfs-forest, then print the corresponding edges
-		if len(i) > 1:
-			for j in i[ :(len(i)-1)]:
-				if i[i.index(j)+1] in G[j]:
-					nx.draw_networkx_edges(G, pos, edgelist = [(j,i[i.index(j)+1])], width = 2.5, alpha = 0.6, edge_color = 'r')
-				else:
-					#if in case the path was reversed because all the possible neighbours were visited, we need to find the adj node to it.
-					for k in i[1::-1]: 
-						if k in G[j]:
-							nx.draw_networkx_edges(G, pos, edgelist = [(j,k)], width = 2.5, alpha = 0.6, edge_color = 'r')
-							break
+mainmenu = pygame_menu.Menu('Pathfinding Visualizer', 600, 400, theme=themes.THEME_SOLARIZED)
+mainmenu.add.text_input('Name: ', default='')
+mainmenu.add.button('Start', algo_menu)
+mainmenu.add.button('Quit', pygame_menu.events.EXIT)
 
 
-#main function
-if __name__ == "__main__":
-	G, source = CreateGraph()
-	dfs_stk = DFS(G, source)
-	DrawDFSPath(G, dfs_stk)
-	plt.show()
+level = pygame_menu.Menu('Select the Algorithm', 600, 400, theme=themes.THEME_BLUE)
+level.add.button('A star', start_the_algo)
+level.add.button('BFS', start_the_algo)
+level.add.button('Bidirectional-BFS', start_the_algo)
+level.add.button('DFS', start_the_algo)
+level.add.button('IDFS', start_the_algo)
+level.add.button('IDAstar', start_the_algo)
+
+ 
+loading = pygame_menu.Menu('Loading the Game...', 600, 400, theme=themes.THEME_DARK)
+loading.add.progress_bar("Progress", progressbar_id = "1", default=0, width = 200, )
+ 
+arrow = pygame_menu.widgets.LeftArrowSelection(arrow_size = (15, 15))
+ 
+update_loading = pygame.USEREVENT + 0
+
+while True:
+    events = pygame.event.get()
+    for event in events:
+        if event.type == update_loading:
+            progress = loading.get_widget("1")
+            progress.set_value(progress.get_value() + 1)
+            if progress.get_value() == 100:
+                pygame.time.set_timer(update_loading, 0) 
+
+        if event.type == pygame.QUIT:
+            exit()
+ 
+    if mainmenu.is_enabled():
+        mainmenu.update(events)
+        mainmenu.draw(surface)
+        if (mainmenu.get_current().get_selected_widget()):
+            arrow.draw(surface, mainmenu.get_current().get_selected_widget())
+ 
+    pygame.display.update()

@@ -10,7 +10,7 @@ def reconstruct_path(came_from,current,draw):
         current.make_path()
         draw()
 
-def idastar(draw,grid,start,end):
+def algorithm(draw,grid,start,end):
     open_set = PriorityQueue()
     open_set.put((0,start))
     came_from = {}
@@ -52,7 +52,7 @@ def idastar(draw,grid,start,end):
     return False
 
 
-def main(win,width):
+def idastar(win,width):
     ROWS = 50
     grid = make_grid(ROWS,width)
     start = None
@@ -94,7 +94,7 @@ def main(win,width):
                     for row in grid:
                         for node in row:
                             node.update_neighbors(grid)
-                    idastar(lambda:draw(win,grid,ROWS,width),grid,start,end)
+                    algorithm(lambda:draw(win,grid,ROWS,width),grid,start,end)
             
                 if event.key == pygame.K_c:
                     start = None
@@ -103,4 +103,4 @@ def main(win,width):
 
     pygame.quit()
 
-main(WIN,WIDTH)
+idastar(WIN,WIDTH)
