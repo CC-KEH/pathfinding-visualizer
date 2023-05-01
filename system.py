@@ -69,20 +69,20 @@ class screen():
         pygame.draw.rect(win, self.color, (self.x,self.y,self.width,self.height),0)
         
         if self.label1 != '':
-            font = pygame.font.SysFont('sans', 20)
+            font = pygame.font.SysFont('comicsans', 20)
             label = font.render(self.label1, 1, (0,0,0))
             win.blit(label, (self.x + 10, self.y + 10))
         
         if self.text1 != '':
-            font = pygame.font.SysFont('sans', 30)
+            font = pygame.font.SysFont('comicsans', 30)
             text = font.render(self.text1, 1, (0,0,0))
             win.blit(text, (self.x + (self.width/2 - text.get_width()/2), self.y + (self.height/2 - text.get_height()/2) - 50))
         if self.text2 != '':
-            font = pygame.font.SysFont('sans', 30)
+            font = pygame.font.SysFont('comicsans', 30)
             text = font.render(self.text2, 1, (0,0,0))
             win.blit(text, (self.x + (self.width/2 - text.get_width()/2), self.y + (self.height/2 - text.get_height()/2)))
         if self.text3 != '':
-            font = pygame.font.SysFont('sans', 30)
+            font = pygame.font.SysFont('comicsans', 30)
             text = font.render(self.text3, 1, (0,0,0))
             win.blit(text, (self.x + (self.width/2 - text.get_width()/2), 50 + self.y + (self.height/2 - text.get_height()/2)))
 
