@@ -28,7 +28,7 @@ class Node:
     def is_visited(self):
         #*Visited node is marked colored as RED
         return self.color == VISIT1
-    
+
     def is_open(self):
         return self.color == OPEN
     

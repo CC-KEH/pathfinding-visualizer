@@ -26,7 +26,7 @@ def dfs(draw,grid,start,end,output, win, width):
                 output.set_text3(f"Efficiency: {np.round(inc/vis, decimals=3)}")
             return visited, path
         c = 1      
-
+        visited.append(current)
         for neighbor in current.neighbors:
             if not neighbor.is_barrier():
                 if neighbor.is_weight():
@@ -34,7 +34,6 @@ def dfs(draw,grid,start,end,output, win, width):
                 if neighbor not in visited:
                     came_from[neighbor] = current
                     stack.append(neighbor)
-                    visited.append(neighbor)
                     neighbor.make_open()
                     if(neighbor == end):
                         path,inc = reconstruct_path(came_from, start, end, draw, visited, win, width, grid)
@@ -43,13 +42,12 @@ def dfs(draw,grid,start,end,output, win, width):
                         output.set_text2(f"#Visited nodes: {vis}")
                         if vis != 0:
                             output.set_text3(f"Efficiency: {np.round(inc/vis, decimals=3)}")
-                        return visited, path
-                                            
+                        return visited, path                                           
         
         if current != start:
             vis+=c
             current.make_visit()
-
+            
         visit_animation(visited)
 
         for rows in grid:
@@ -63,7 +61,6 @@ def dfs(draw,grid,start,end,output, win, width):
 
 
 
-# def dfs(draw,grid,start,end):
 #     stack = [start]
 #     visited = {start}
 #     came_from = {}

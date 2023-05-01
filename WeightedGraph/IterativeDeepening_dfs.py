@@ -36,7 +36,6 @@ def iterative_deepening_dfs(draw,grid,start,end,depth=20):
             depth-=1
     return False
 
-        
 
 def main(win,width):
     ROWS = 50

@@ -128,7 +128,7 @@ def path_animation(path):
                     node.dec_animation = True
         node.color = (r, g, b)
 
-def reconstruct_path(came_from, start, current, draw, visited,  win, width, grid, is_draw = True):
+def reconstruct_path(came_from, start, current, draw, visited,  win, width, grid, is_draw = True): 
     path = []
     c = 0
     while current in came_from:

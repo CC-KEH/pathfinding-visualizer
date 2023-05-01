@@ -23,36 +23,48 @@ def bi_bfs(draw,grid,start,end,output, win, width):
         current2 = queue2.pop(0)
 
         if (current1 in visited2):
-            path,inc = reconstruct_path(came_from1,current1,start,draw,visited1, win, width, grid)
-            path,inc = reconstruct_path(came_from2,current1,end,draw,visited2, win, width, grid)
+            path1,inc1 = reconstruct_path(came_from1,start,current1,draw,visited1, win, width, grid)
+            start.make_start()
+            path2,inc2 = reconstruct_path(came_from2,end,current1,draw,visited2, win, width, grid)
+            end.make_end()
+            current1.make_path()
+            output.set_text1(f"Path Length: {inc1+inc2+1}")
+            output.set_text2(f"#Visited nodes: {vis}")
+            if vis != 0:
+                output.set_text3(f"Efficiency: {np.round(inc1+inc2+1+1/vis, decimals=3)}")
+            return visited2+visited1, path1+path2
+                      
+        elif (current2 in visited1):
+            path1,inc1 = reconstruct_path(came_from1,start,current2,draw,visited1, win, width, grid)
+            start.make_start()
+            path2,inc2 = reconstruct_path(came_from2,end,current2,draw,visited2, win, width, grid)
+            end.make_end()
+            current2.make_path()
+            output.set_text1(f"Path Length: {inc1+inc2+1}")
+            output.set_text2(f"#Visited nodes: {vis}")
+            if vis != 0:
+                output.set_text3(f"Efficiency: {np.round(inc1+inc2+1+1/vis, decimals=3)}")
+            return visited1+visited2, path1 + path2
+        
+
+        if current1 == end:
+            path,inc = reconstruct_path(came_from1,start,end,draw,visited1, win, width, grid)
+            start.make_start()
+            output.set_text1(f"Path Length: {inc}")
+            output.set_text2(f"#Visited nodes: {vis}")
+            if vis != 0:
+                output.set_text3(f"Efficiency: {np.round(inc/vis, decimals=3)}")
+            return visited1, path
+        
+        elif current2 == start:
+            path,inc = reconstruct_path(came_from1,start,end,draw,visited2, win, width, grid)
             start.make_start()
             output.set_text1(f"Path Length: {inc}")
             output.set_text2(f"#Visited nodes: {vis}")
             if vis != 0:
                 output.set_text3(f"Efficiency: {np.round(inc/vis, decimals=3)}")
             return visited2, path
-                      
-        elif (current2 in visited1):
-            path,inc = reconstruct_path(came_from1,start,current2,draw,visited1, win, width, grid)
-            path,inc = reconstruct_path(came_from2,current2,end,draw,visited2, win, width, grid)
-            start.make_start()
-            output.set_text1(f"Path Length: {inc}")
-            output.set_text2(f"#Visited nodes: {vis}")
-            if vis != 0:
-                output.set_text3(f"Efficiency: {np.round(inc/vis, decimals=3)}")
-            return visited1, path
-        
 
-        if current1 == end or current2 == start:
-            path,inc = reconstruct_path(came_from1,current1,end,draw,visited1, win, width, grid)
-            path,inc = reconstruct_path(came_from2,current2,start,draw,visited2, win, width, grid)
-            start.make_start()
-            output.set_text1(f"Path Length: {inc}")
-            output.set_text2(f"#Visited nodes: {vis}")
-            if vis != 0:
-                output.set_text3(f"Efficiency: {np.round(inc/vis, decimals=3)}")
-            return visited1, path
-        
         c = 1
 
         for neighbor in current1.neighbors: #*Check all the neighbors of the current node
@@ -60,31 +72,32 @@ def bi_bfs(draw,grid,start,end,output, win, width):
                 if neighbor not in visited1:
                     came_from1[neighbor] = current1
                     if(neighbor == end): #* If the neighbor node is the end node, then we reconstruct the path and return True
-                        path, inc = reconstruct_path(came_from1, start, end, draw, visited1, win, width, grid)
+                        path1, inc1 = reconstruct_path(came_from1, start, end, draw, visited1, win, width, grid)
                         start.make_start()
-                        output.set_text1(f"Path Length: {inc}")
+                        output.set_text1(f"Path Length: {inc1}")
                         output.set_text2(f"#Visited nodes: {vis}")
                         if vis != 0:
-                            output.set_text3(f"Efficiency: {np.round(inc/vis, decimals=3)}")
-                        return visited1, path   
+                            output.set_text3(f"Efficiency: {np.round(inc1/vis, decimals=3)}")
+                        return visited1, path1   
                     queue1.append(neighbor)
                     visited1.append(neighbor)
                     neighbor.make_open()
         
-        for neighbor in current2.neighbors: #*Check all the neighbors of the current node
-            if neighbor not in visited2:
-                came_from2[neighbor] = current2
-                if(neighbor == end): #* If the neighbor node is the end node, then we reconstruct the path and return True
-                    path, inc = reconstruct_path(came_from1, start, end, draw, visited2, win, width, grid)
-                    start.make_start()
-                    output.set_text1(f"Path Length: {inc}")
-                    output.set_text2(f"#Visited nodes: {vis}")
-                    if vis != 0:
-                        output.set_text3(f"Efficiency: {np.round(inc/vis, decimals=3)}")
-                    return visited2, path  
-                queue2.append(neighbor)
-                visited2.append(neighbor)
-                neighbor.make_open() 
+        for neighbor in current2.neighbors: 
+            if not neighbor.is_barrier():
+                if neighbor not in visited2:
+                    came_from2[neighbor] = current2
+                    if(neighbor == end): #* If the neighbor node is the end node, then we reconstruct the path and return True
+                        path2, inc2 = reconstruct_path(came_from1, start, end, draw, visited2, win, width, grid)
+                        start.make_start()
+                        output.set_text1(f"Path Length: {inc2}")
+                        output.set_text2(f"#Visited nodes: {vis}")
+                        if vis != 0:
+                            output.set_text3(f"Efficiency: {np.round(inc2/vis, decimals=3)}")
+                        return visited2, path2  
+                    queue2.append(neighbor)
+                    visited2.append(neighbor)
+                    neighbor.make_open() 
         
         if current1 != start:
             vis+=c
@@ -106,7 +119,7 @@ def bi_bfs(draw,grid,start,end,output, win, width):
         draw_grid(win, len(grid), width)
         pygame.display.update()
 
-    return visited1, False
+    return visited1+visited2, False
 
         
 
