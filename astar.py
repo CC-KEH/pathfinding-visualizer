@@ -5,8 +5,6 @@ from constants import *
 from system import *
 import numpy as np
 
-
-
 def A_star(draw, grid, start, end, output, win, width):
     count = 0
     vis = 0

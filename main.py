@@ -139,7 +139,7 @@ def main(win, width):
                                 if not node.is_neutral() and node != start and node != end and not node.is_barrier() and not node.is_weight():
                                     node.reset()
                         visited = []
-                        path = []
+                        path = [] 
                         output.set_text1("......")
                         output.set_text2("")
                         output.set_text3("")
