@@ -25,7 +25,7 @@ class button():
         pygame.draw.circle(win, self.color, (self.x+self.width, self.y+self.height//2), self.height//2)
         
         if self.text != '':
-            font = pygame.font.SysFont('comicsans', 35)
+            font = pygame.font.SysFont('verdana', 20)
             text = font.render(self.text, 1, (0,0,0))
             win.blit(text, (self.x + (self.width/2 - text.get_width()/2), self.y + (self.height/2 - text.get_height()/2)))
 
@@ -36,6 +36,12 @@ class button():
                 return True
             
         return False
+    
+    def toggle_color(self):
+        if(self.color == BUTTON_COLOR):
+            self.color = (129, 201, 202)
+        else:
+            self.color = BUTTON_COLOR
 
 class screen():
     def __init__(self, x,y,width,height, text=''):
@@ -69,20 +75,20 @@ class screen():
         pygame.draw.rect(win, self.color, (self.x,self.y,self.width,self.height),0)
         
         if self.label1 != '':
-            font = pygame.font.SysFont('comicsans', 20)
+            font = pygame.font.SysFont('verdana', 20)
             label = font.render(self.label1, 1, (0,0,0))
             win.blit(label, (self.x + 10, self.y + 10))
         
         if self.text1 != '':
-            font = pygame.font.SysFont('comicsans', 30)
+            font = pygame.font.SysFont('verdana', 30)
             text = font.render(self.text1, 1, (0,0,0))
             win.blit(text, (self.x + (self.width/2 - text.get_width()/2), self.y + (self.height/2 - text.get_height()/2) - 50))
         if self.text2 != '':
-            font = pygame.font.SysFont('comicsans', 30)
+            font = pygame.font.SysFont('verdana', 30)
             text = font.render(self.text2, 1, (0,0,0))
             win.blit(text, (self.x + (self.width/2 - text.get_width()/2), self.y + (self.height/2 - text.get_height()/2)))
         if self.text3 != '':
-            font = pygame.font.SysFont('comicsans', 30)
+            font = pygame.font.SysFont('verdana', 30)
             text = font.render(self.text3, 1, (0,0,0))
             win.blit(text, (self.x + (self.width/2 - text.get_width()/2), 50 + self.y + (self.height/2 - text.get_height()/2)))
 
@@ -164,7 +170,7 @@ def draw(win, grid, rows, width, algorithms, mazes, options, output, menu = True
         ht = 900
         width = ht
         w = 1600
-        font = pygame.font.SysFont('comicsans', 35)
+        font = pygame.font.SysFont('verdana', 35)
         text = font.render("Algorithms", 1, WHITE)
         top = 0
         end = ht//40

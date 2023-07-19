@@ -11,6 +11,8 @@ from bidirectional_astar import *
 from bfs import *
 from bidirectional_bfs import *
 from dfs import *
+
+
 def main(win, width):
     ROWS = 50
     w, ht = pygame.display.get_surface().get_size()
@@ -21,25 +23,35 @@ def main(win, width):
     top_start = ht/13
     but_height = ht//15
     but_width = delta//4
+    gap_factor = 5 #* Determines the gap between the buttons
+    start_factor = 10 #* Determines the coordinate from where the button start in x-axis.
     
     algorithms = [
-        button(width+delta//5, top_start, but_width-but_height, but_height, "A*"),
+        button(width+delta//start_factor, top_start, but_width-but_height, but_height, 'BFS*'),
+        
+        button(width+delta//start_factor, top_start + (6*but_height//2), but_width-but_height, but_height, 'DFS'),
+        
+        button(width+delta//start_factor, top_start + (3*but_height//2), but_width-but_height, but_height, 'Bi-BFS'),
+        
+        button(width+delta//start_factor+ (gap_factor*but_width//4), top_start, but_width-but_height, but_height, "A*"),
 
-        button(width+delta//5+ (5*but_width//4), top_start, but_width-but_height, but_height, 'IDA*'),
+        button(width+delta//start_factor+ (gap_factor*but_width//4), top_start + (3*but_height//2), but_width-but_height, but_height, 'IDA*'),
         
-        button(width+delta//5, top_start + (3*but_height//2), but_width-but_height, but_height, 'Bi-A*'),
+        button(width+delta//start_factor+ (gap_factor*but_width//4), top_start + (6*but_height//2), but_width-but_height, but_height, 'Bi-A*'),
         
-        button(width+delta//5+ (5*but_width//4), top_start + (3*but_height//2), but_width-but_height, but_height, 'BFS*'),
+        button(width+delta//start_factor+ ((gap_factor * 2)*but_width//4) ,top_start, but_width-but_height, but_height, 'Dijkstra'),
         
-        button(width+delta//5, top_start + (6*but_height//2), but_width-but_height, but_height, 'DFS'),
+        button(width+delta//start_factor+ ((gap_factor * 2)*but_width//4), top_start + (3*but_height//2), but_width-but_height, but_height, 'Bellman-Ford'),
         
-        button(width+delta//5+ (5*but_width//4), top_start + (6*but_height//2), but_width-but_height, but_height, 'Bi-BFS'),
+        button(width+delta//start_factor+ ((gap_factor * 2)*but_width//4), top_start + (6*but_height//2), but_width-but_height, but_height, 'Floyd-Warshall'),    
     ]
 
     top_start = top_start + (1.9*(3*but_height//2)) + but_height + ht//12
     but_height = ht//15
     but_width = delta//4+ delta//10
     mazes = [
+        button(width+delta//3, top_start, but_width-delta//50-but_height, but_height, "DFS Maze"),
+        button(width+delta//3, top_start, but_width-delta//50-but_height, but_height, "DFS Maze"),
         button(width+delta//3, top_start, but_width-delta//50-but_height, but_height, "DFS Maze"),
     ]
     top_start = top_start + (1.3*(3*but_height//2)) + ht//10
@@ -106,6 +118,7 @@ def main(win, width):
                         node.make_barrier()
                         
                 elif algorithms[0].is_hover(pos):
+                    algorithms[0].toggle_color()
                     output.draw(win, (0, 0, 0))
                     if len(weighted):
                         for node in weighted:
@@ -126,9 +139,11 @@ def main(win, width):
                         visited, path = A_star(lambda: draw(win, grid, ROWS, width, algorithms, mazes, options, output), grid, start, end, output, win, width)
                         if not path:
                             output.set_text1("Path not available")
+                        algorithms[0].toggle_color()
                             
                 
                 elif algorithms[1].is_hover(pos):
+                    algorithms[1].toggle_color()
                     if len(weighted):
                         for node in weighted:
                             node.mark_weight()
@@ -148,10 +163,11 @@ def main(win, width):
                         visited, path = IDA_star(lambda: draw(win, grid, ROWS, width, algorithms, mazes, options, output), win, width, output, grid, start, end, heuristic(start.get_pos(), end.get_pos()))
                         if not path:
                             output.set_text1("Path not available")
-                            
+                        algorithms[1].toggle_color()
                           
                           
                 elif algorithms[2].is_hover(pos):
+                    algorithms[2].toggle_color()
                     if len(weighted):
                         for node in weighted:
                             node.mark_weight()
@@ -171,8 +187,10 @@ def main(win, width):
                         visited, path = bi_astar(lambda: draw(win, grid, ROWS, width, algorithms, mazes, options, output), grid, start, end, output, win, width)
                         if not path:
                             output.set_text1("Path not available")
-
+                        algorithms[2].toggle_color()
+                    
                 elif algorithms[3].is_hover(pos):
+                    algorithms[3].toggle_color()
                     if len(weighted):
                         for node in weighted:
                             node.mark_weight()
@@ -192,8 +210,10 @@ def main(win, width):
                         visited, path = bfs(lambda: draw(win, grid, ROWS, width, algorithms, mazes, options, output), grid, start, end, output, win, width)
                         if not path:
                             output.set_text1("Path not available")
-                
+                        algorithms[3].toggle_color()
+                    
                 elif algorithms[4].is_hover(pos):
+                    algorithms[4].toggle_color()
                     if len(weighted):
                         for node in weighted:
                             node.mark_weight()
@@ -213,8 +233,10 @@ def main(win, width):
                         visited, path = dfs(lambda: draw(win, grid, ROWS, width, algorithms, mazes, options, output), grid, start, end, output, win, width)
                         if not path:
                             output.set_text1("Path not available")
+                        algorithms[4].toggle_color()
                 
                 elif algorithms[5].is_hover(pos):
+                    algorithms[5].toggle_color()
                     if len(weighted):
                         for node in weighted:
                             node.mark_weight()
@@ -234,6 +256,8 @@ def main(win, width):
                         visited, path = bi_bfs(lambda: draw(win, grid, ROWS, width, algorithms, mazes, options, output), grid, start, end, output, win, width)
                         if not path:
                             output.set_text1("Path not available")
+                        algorithms[5].toggle_color()
+                    
 
                 elif mazes[0].is_hover(pos):
                     output.set_text1("......")
