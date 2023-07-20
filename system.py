@@ -174,7 +174,7 @@ def draw(win, grid, rows, width, algorithms, mazes, options, output, menu = True
         text = font.render("Algorithms", 1, WHITE)
         top = 0
         end = ht//40
-        win.blit(text, (width+delta//6, (end-top)/2.5))
+        win.blit(text, ((width+delta//4.5), (end-top)/2.5))
         for algorithm in algorithms:
             algorithm.draw(win, BLACK)
         

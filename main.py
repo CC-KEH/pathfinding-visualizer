@@ -11,6 +11,9 @@ from bidirectional_astar import *
 from bfs import *
 from bidirectional_bfs import *
 from dfs import *
+from dijkstra import *
+from bellmanford import *
+from floydwarshall import *
 
 
 def main(win, width):
@@ -46,30 +49,38 @@ def main(win, width):
         button(width+delta//start_factor+ ((gap_factor * 2)*but_width//4), top_start + (6*but_height//2), but_width-but_height, but_height, 'Floyd-Warshall'),    
     ]
 
-    top_start = top_start + (1.9*(3*but_height//2)) + but_height + ht//12
+    top_start = top_start + (1.9*(3*but_height//2)) + but_height + ht//10
     but_height = ht//15
-    but_width = delta//4+ delta//10
+    but_width = delta//4
     mazes = [
-        button(width+delta//3, top_start, but_width-delta//50-but_height, but_height, "DFS Maze"),
-        button(width+delta//3, top_start, but_width-delta//50-but_height, but_height, "DFS Maze"),
-        button(width+delta//3, top_start, but_width-delta//50-but_height, but_height, "DFS Maze"),
+        button(width+delta//start_factor, top_start, but_width-but_height, but_height, "DFS Maze"),
+        
+        button(width+delta//start_factor + (gap_factor*but_width//4), top_start, but_width-but_height, but_height, "Wilson"),
+        
+        button(width+delta//start_factor + ((gap_factor*2)*but_width//4), top_start, but_width-but_height, but_height, "Kruskal"),
+        
+        button(width+delta//start_factor + ((gap_factor*2)*but_width//4), top_start, but_width-but_height, but_height, "Randomized Prim's"),
+        
+        button(width+delta//start_factor + ((gap_factor*2)*but_width//4), top_start, but_width-but_height, but_height, "Eller's"),
+        
+        button(width+delta//start_factor + ((gap_factor*2)*but_width//4), top_start, but_width-but_height, but_height, "Aldous-Brode"),
     ]
     top_start = top_start + (1.3*(3*but_height//2)) + ht//10
     but_height = ht//15
     but_width =  delta//10
     options = [
-        button(width+delta//5, top_start, but_width-but_height+20, but_height, "Clear"),
-        button(width+delta//5-20 + delta//5 + (4*(but_width+50)//3), top_start, 0, but_height, "-"),
-        button(width+delta//5 + delta//5 + (4*(but_width+50)//3)+(4*(but_width-30)//3), top_start,0, but_height, "+"),
+        button(width+delta//5, top_start-35, but_width-but_height+20, but_height, "Clear"),
+        button(width+delta//5-20 + delta//5 + (4*(but_width+50)//3), top_start-35, 0, but_height, "-"),
+        button(width+delta//5 + delta//5 + (4*(but_width+50)//3)+(4*(but_width-30)//3), top_start-35,0, but_height, "+"),
     ]
     sc_start = ht-240
     sc_height = 230
     sc_width = delta-delta//4
     output = screen(width+delta//8, sc_start, sc_width, sc_height, "Choose an Algorithm")
     output.set_label1(f"Number of rows: {ROWS}")
-    output.set_text1("1. Pick starting node")
+    output.set_text1(" 1. Pick starting node")
     output.set_text2("2. Pick ending node")
-    output.set_text3("3. Choose an algorithm")
+    output.set_text3("     3. Choose an algorithm")
     
     start = None
     end = None
@@ -136,7 +147,7 @@ def main(win, width):
                         output.set_text3("")
                         output.draw(win, BLACK)
                         pygame.display.update()
-                        visited, path = A_star(lambda: draw(win, grid, ROWS, width, algorithms, mazes, options, output), grid, start, end, output, win, width)
+                        visited, path = bfs(lambda: draw(win, grid, ROWS, width, algorithms, mazes, options, output), grid, start, end, output, win, width)
                         if not path:
                             output.set_text1("Path not available")
                         algorithms[0].toggle_color()
@@ -160,7 +171,7 @@ def main(win, width):
                         output.set_text3("")
                         output.draw(win, BLACK)
                         pygame.display.update()
-                        visited, path = IDA_star(lambda: draw(win, grid, ROWS, width, algorithms, mazes, options, output), win, width, output, grid, start, end, heuristic(start.get_pos(), end.get_pos()))
+                        visited, path = dfs(lambda: draw(win, grid, ROWS, width, algorithms, mazes, options, output), grid, start, end, output, win, width)
                         if not path:
                             output.set_text1("Path not available")
                         algorithms[1].toggle_color()
@@ -184,7 +195,7 @@ def main(win, width):
                         output.set_text3("")
                         output.draw(win, BLACK)
                         pygame.display.update()
-                        visited, path = bi_astar(lambda: draw(win, grid, ROWS, width, algorithms, mazes, options, output), grid, start, end, output, win, width)
+                        visited, path = bi_bfs(lambda: draw(win, grid, ROWS, width, algorithms, mazes, options, output), grid, start, end, output, win, width)
                         if not path:
                             output.set_text1("Path not available")
                         algorithms[2].toggle_color()
@@ -207,7 +218,7 @@ def main(win, width):
                         output.set_text3("")
                         output.draw(win, BLACK)
                         pygame.display.update()
-                        visited, path = bfs(lambda: draw(win, grid, ROWS, width, algorithms, mazes, options, output), grid, start, end, output, win, width)
+                        visited, path = A_star(lambda: draw(win, grid, ROWS, width, algorithms, mazes, options, output), grid, start, end, output, win, width)
                         if not path:
                             output.set_text1("Path not available")
                         algorithms[3].toggle_color()
@@ -230,7 +241,7 @@ def main(win, width):
                         output.set_text3("")
                         output.draw(win, BLACK)
                         pygame.display.update()
-                        visited, path = dfs(lambda: draw(win, grid, ROWS, width, algorithms, mazes, options, output), grid, start, end, output, win, width)
+                        visited, path = IDA_star(lambda: draw(win, grid, ROWS, width, algorithms, mazes, options, output), win, width, output, grid, start, end, heuristic(start.get_pos(), end.get_pos()))
                         if not path:
                             output.set_text1("Path not available")
                         algorithms[4].toggle_color()
@@ -253,10 +264,79 @@ def main(win, width):
                         output.set_text3("")
                         output.draw(win, BLACK)
                         pygame.display.update()
-                        visited, path = bi_bfs(lambda: draw(win, grid, ROWS, width, algorithms, mazes, options, output), grid, start, end, output, win, width)
+                        visited, path = bi_astar(lambda: draw(win, grid, ROWS, width, algorithms, mazes, options, output), grid, start, end, output, win, width)
                         if not path:
                             output.set_text1("Path not available")
                         algorithms[5].toggle_color()
+                    
+                elif algorithms[6].is_hover(pos):
+                    algorithms[6].toggle_color()
+                    if len(weighted):
+                        for node in weighted:
+                            node.mark_weight()
+                    if start and end:
+                        for row in grid:
+                            for node in row:
+                                node.update_neighbors(grid)
+                                if not node.is_neutral() and node != start and node != end and not node.is_barrier() and not node.is_weight():
+                                    node.reset()
+                        visited = []
+                        path = []
+                        output.set_text1("......")
+                        output.set_text2("")
+                        output.set_text3("")
+                        output.draw(win, BLACK)
+                        pygame.display.update()
+                        visited, path = dijkstra(lambda: draw(win, grid, ROWS, width, algorithms, mazes, options, output), grid, start, end, output, win, width)
+                        if not path:
+                            output.set_text1("Path not available")
+                        algorithms[6].toggle_color()
+                    
+                elif algorithms[7].is_hover(pos):
+                    algorithms[7].toggle_color()
+                    if len(weighted):
+                        for node in weighted:
+                            node.mark_weight()
+                    if start and end:
+                        for row in grid:
+                            for node in row:
+                                node.update_neighbors(grid)
+                                if not node.is_neutral() and node != start and node != end and not node.is_barrier() and not node.is_weight():
+                                    node.reset()
+                        visited = []
+                        path = []
+                        output.set_text1("......")
+                        output.set_text2("")
+                        output.set_text3("")
+                        output.draw(win, BLACK)
+                        pygame.display.update()
+                        visited, path = bellmanFord(lambda: draw(win, grid, ROWS, width, algorithms, mazes, options, output), grid, start, end, output, win, width)
+                        if not path:
+                            output.set_text1("Path not available")
+                        algorithms[7].toggle_color()
+                    
+                elif algorithms[8].is_hover(pos):
+                    algorithms[8].toggle_color()
+                    if len(weighted):
+                        for node in weighted:
+                            node.mark_weight()
+                    if start and end:
+                        for row in grid:
+                            for node in row:
+                                node.update_neighbors(grid)
+                                if not node.is_neutral() and node != start and node != end and not node.is_barrier() and not node.is_weight():
+                                    node.reset()
+                        visited = []
+                        path = []
+                        output.set_text1("......")
+                        output.set_text2("")
+                        output.set_text3("")
+                        output.draw(win, BLACK)
+                        pygame.display.update()
+                        visited, path = floydWarshall(lambda: draw(win, grid, ROWS, width, algorithms, mazes, options, output), grid, start, end, output, win, width)
+                        if not path:
+                            output.set_text1("Path not available")
+                        algorithms[8].toggle_color()
                     
 
                 elif mazes[0].is_hover(pos):
