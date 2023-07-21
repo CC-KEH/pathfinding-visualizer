@@ -21,7 +21,14 @@ class Node:
         self.weight = False
         self.dec_animation = False
         self.cooldown = 300
+        self.distance = float('inf')
 
+    def set_distance(self, distance):
+        self.distance = distance
+    
+    def get_distance(self):
+        return self.distance
+    
     def get_pos(self):
         return self.row,self.col
 

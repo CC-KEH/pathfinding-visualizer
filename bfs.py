@@ -10,6 +10,7 @@ def bfs(draw,grid,start,end,output, win, width):   #*Breadth First Search
     visited = [start]
     came_from = {}
     vis = 0
+# The code snippet above defines a breadth-first search algorithm that finds the shortest path between a start and end node on a grid. It uses the Pygame library for visualization and the numpy library for efficiency calculations.
     while queue:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
