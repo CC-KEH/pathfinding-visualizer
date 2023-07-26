@@ -47,6 +47,3 @@ The graphical interface is created using Pygame, a Python library for game devel
 
 ## Contributions
 Contributions to this repository are welcome! If you have any improvements, bug fixes, or new algorithms to add, feel free to create a pull request.
-
-## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
